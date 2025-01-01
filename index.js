@@ -31,6 +31,26 @@ async function run() {
         const result = await menuCollection.find().toArray()
         res.send(result)
     })
+
+    app.get('/reviewItem', async(req, res)=>{
+        const result = await reviewCollection.find().toArray()
+        res.send(result)
+    })
+
+    app.get('/categoryData/:category', async(req, res)=>{
+         const category = req.params.category
+         const query = {category: category}
+         const page = parseInt(req.query.page) 
+         const limit = parseInt(req.query.limit)
+         const result = await menuCollection.find(query).skip(page*limit).limit(limit).toArray()
+
+         const totalItems = await menuCollection.countDocuments(query);
+
+         res.send({
+            data: result,
+            totalItems:totalItems
+         })
+    })
     
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
