@@ -26,6 +26,8 @@ async function run() {
 
     const menuCollection = client.db("bistroDb").collection("menuCollection");
     const reviewCollection = client.db("bistroDb").collection("reviewCollection");
+    const userCollection = client.db("bistroDb").collection("userCollection");
+    const cartCollection = client.db("bistroDb").collection("cartCollection");
     
     app.get('/menuItem', async(req, res)=>{
         const result = await menuCollection.find().toArray()
@@ -50,6 +52,35 @@ async function run() {
             data: result,
             totalItems:totalItems
          })
+    })
+
+    app.post('/users', async(req, res)=>{
+      const users = req.body
+      const email = req.body.email
+      const query = {email}
+      const isExist = await userCollection.findOne(query)
+      if(isExist){
+        return res.send(isExist)
+      }
+      const result = await userCollection.insertOne({
+        ...users,
+        loginDate: Date.now(),
+        type:"client"
+      })
+      res.send(result)
+    })
+
+    app.post('/cart', async(req, res)=>{
+      const cart = req.body
+      const email = cart.email
+      const productId = cart.productId
+      const query = {email, productId}
+      const isExist = await cartCollection.findOne(query)
+      if(isExist){
+        return res.send({acknowledged:false})
+      }
+      const result = await cartCollection.insertOne(cart)
+      res.send(result)
     })
     
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
